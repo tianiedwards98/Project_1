@@ -2,7 +2,7 @@
   "name": "project_1",
   "version": "1.0.0",
   "description": "Login/Register Submit Ticket Ticketing System View Previous Tickets",
-  "main": "app-ex.js",
+  "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
