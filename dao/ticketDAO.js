@@ -6,7 +6,7 @@ AWS.config.update({
 
 const docClient = new AWS.DynamoDB.DocumentClient();
 
-function submitTicketDAO(ticket_id,author,description,type,amount){
+function submitTicketDAO(ticket_id,author,description,type,amount,status){
     const params = {
         TableName: 'Tickets',
         Item: {
@@ -14,11 +14,43 @@ function submitTicketDAO(ticket_id,author,description,type,amount){
             author,
             description,
             type,
-            amount
+            amount,
+            status
         },
         
     }
     return docClient.put(params).promise();
 }
 
-module.exports = {submitTicketDAO};
+function updateTicketDAO(ticket_id, decision){
+    const params = {
+        TableName: 'Tickets',
+        Key: {
+            ticket_id
+        },
+        UpdateExpression: 'set #s = :r',
+        ExpressionAttributeValues: {
+            ':r': decision,
+        },
+        ExpressionAttributeNames: {
+            "#s": "status"
+        }
+    };
+    return docClient.update(params).promise();
+}
+function getTicketByIdDAO(ticket_id){
+    const params = {
+        TableName: 'Tickets',
+        Key: {
+            ticket_id
+        }
+    }
+    return docClient.get(params).promise();
+}
+function retrieveAllTickets(){
+    const params = {
+        TableName: 'Tickets'
+    }
+    return docClient.scan(params).promise();
+}
+module.exports = {submitTicketDAO, updateTicketDAO, getTicketByIdDAO,retrieveAllTickets};
