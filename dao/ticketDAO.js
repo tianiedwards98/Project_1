@@ -6,14 +6,13 @@ AWS.config.update({
 
 const docClient = new AWS.DynamoDB.DocumentClient();
 
-function submitTicketDAO(ticket_id,author,description,type,amount,status){
+function submitTicketDAO(username,ticket_id,description,amount,status){
     const params = {
         TableName: 'Tickets',
         Item: {
+            username,
             ticket_id,
-            author,
             description,
-            type,
             amount,
             status
         },
@@ -22,35 +21,55 @@ function submitTicketDAO(ticket_id,author,description,type,amount,status){
     return docClient.put(params).promise();
 }
 
-function updateTicketDAO(ticket_id, decision){
+function updateTicketDAO(ticket_id, status, resolver){
     const params = {
         TableName: 'Tickets',
         Key: {
             ticket_id
         },
-        UpdateExpression: 'set #s = :r',
-        ExpressionAttributeValues: {
-            ':r': decision,
-        },
+        UpdateExpression: 'set #s = :status, #r =  :resolver',
+        ConditionExpression: 'attribute_exists(ticket_id) AND #s = :pending',
         ExpressionAttributeNames: {
-            "#s": "status"
-        }
-    };
-    return docClient.update(params).promise();
-}
-function getTicketByIdDAO(ticket_id){
-    const params = {
-        TableName: 'Tickets',
-        Key: {
-            ticket_id
+            '#s': 'status',
+            '#r': 'resolver'
+        },
+        ExpressionAttributeValues: {
+            ':status': status,
+            ':resolver': resolver,
+            ':pending': "Pending"
         }
     }
-    return docClient.get(params).promise();
+    return docClient.update(params).promise();
 }
-function retrieveAllTickets(){
+
+function retrievePreviousTicketsByUser(username){
     const params = {
-        TableName: 'Tickets'
+        TableName: 'Tickets',
+        FilterExpression: '#username = :username',
+        ExpressionAttributeValues: { ':username': username},
+        ExpressionAttributeNames: {'#username': 'username'}
     }
     return docClient.scan(params).promise();
 }
-module.exports = {submitTicketDAO, updateTicketDAO, getTicketByIdDAO,retrieveAllTickets};
+
+function retrieveTicketById(ticket_id){
+    const params = {
+        TableName: 'Tickets',
+       Key: {
+        ticket_id
+       }
+    }
+    docClient.get(params).promise();
+}
+
+function retrievePendingTickets(){
+    const params = {
+        TableName: 'Tickets',
+        FilterExpression: '#s = :status',
+        ExpressionAttributeValues: { ':status':'Pending'},
+        ExpressionAttributeNames: {'#s': 'status'}
+
+    }
+    return docClient.scan(params).promise();
+}
+module.exports = {submitTicketDAO, updateTicketDAO,retrievePreviousTicketsByUser,retrievePendingTickets,retrieveTicketById};

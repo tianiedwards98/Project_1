@@ -6,28 +6,28 @@ AWS.config.update({
 
 const docClient = new AWS.DynamoDB.DocumentClient();
 
-function getUserDAO(Username){
+function retrieveUser(username){
     const params = {
         TableName: 'Users',
        Key: {
-        Username
+        username
        }
     }
     return docClient.get(params).promise();
 
 }
 
-function registerUser (Username, Password, Admin){
+function registerUser (username,password,role){
     const params = {
         TableName: 'Users',
         Item: {
-            Username,
-            Password,
-            Admin
+            username,
+            password,
+            role
         },
         
     }
     return docClient.put(params).promise();
 }
 
-module.exports = {registerUser,getUserDAO};
+module.exports = {registerUser,retrieveUser};
