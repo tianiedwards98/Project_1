@@ -82,7 +82,7 @@ app.get('/endpointforadminsonly', (req, res) => {
     console.log(token);
     jwtUtil.verifyTokenAndReturnPayload(token)
         .then((payload) => {
-
+            console.log(payload.role)
             if(payload.role === 'admin'){
                 res.send({
                     message: `Welcome Admin ${payload.username}`
@@ -107,7 +107,7 @@ app.get('/endpointforadminsonly', (req, res) => {
 app.post('/register', async (req,res)=>{
     const username = req.body.username;
     const password = req.body.password;
-    const admin = req.body.role;
+    const admin = "employee";
     const existingAccount = await userDao.retrieveUser(username);
 
     userDao.registerUser(username,password,admin)
